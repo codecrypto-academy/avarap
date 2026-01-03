@@ -94,11 +94,13 @@ export default function DashboardPage() {
                         <CardTitle>Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        <Button className="w-full justify-start" asChild>
-                            <Link href="/tokens/create">
-                                <Plus className="mr-2 h-4 w-4" /> Create Token
-                            </Link>
-                        </Button>
+                        {stats.role === "Producer" && (
+                            <Button className="w-full justify-start" asChild>
+                                <Link href="/tokens/create">
+                                    <Plus className="mr-2 h-4 w-4" /> Create Token
+                                </Link>
+                            </Button>
+                        )}
                         <Button className="w-full justify-start" variant="outline" asChild>
                             <Link href="/transfers">
                                 <Send className="mr-2 h-4 w-4" /> View Transfers

@@ -6,15 +6,33 @@ import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+import { CONTRACT_CONFIG } from "@/contracts/config";
+import { useEffect, useState } from "react";
+
 export function Header() {
     const { account, disconnect } = useWallet();
     const pathname = usePathname();
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const checkAdmin = () => {
+            if (account && CONTRACT_CONFIG.adminAddress) {
+                const isMatch = account.toLowerCase() === CONTRACT_CONFIG.adminAddress.toLowerCase();
+                setIsAdmin(isMatch);
+            } else {
+                setIsAdmin(false);
+            }
+        };
+        checkAdmin();
+    }, [account]);
 
     const navItems = [
-        { name: "Dashboard", href: "/dashboard" },
-        { name: "Tokens", href: "/tokens" },
-        { name: "Transfers", href: "/transfers" },
-        { name: "Profile", href: "/profile" },
+        { name: "Dashboard", href: "/dashboard", visible: true },
+        { name: "Tokens", href: "/tokens", visible: !isAdmin },
+        { name: "Transfers", href: "/transfers", visible: !isAdmin },
+        { name: "Trace", href: "/trace", visible: true },
+        { name: "Admin", href: "/admin", visible: isAdmin },
+        { name: "Profile", href: "/profile", visible: true },
     ];
 
     return (
@@ -27,18 +45,21 @@ export function Header() {
                         </span>
                     </Link>
                     <nav className="flex items-center space-x-6 text-sm font-medium">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "transition-colors hover:text-foreground/80",
-                                    pathname === item.href ? "text-foreground" : "text-foreground/60"
-                                )}
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
+                        {navItems.map((item) => {
+                            if (!item.visible) return null;
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={cn(
+                                        "transition-colors hover:text-foreground/80",
+                                        pathname === item.href ? "text-foreground" : "text-foreground/60"
+                                    )}
+                                >
+                                    {item.name}
+                                </Link>
+                            );
+                        })}
                     </nav>
                 </div>
                 <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">

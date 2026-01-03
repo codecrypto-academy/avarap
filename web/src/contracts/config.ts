@@ -25,7 +25,8 @@ export const CONTRACT_CONFIG = {
         "function nextUserId() public view returns (uint256)",
         "function users(uint256 userId) public view returns (uint256 id, address userAddress, string role, uint8 status)",
         "function nextTokenId() public view returns (uint256)",
-        "function nextTransferId() public view returns (uint256)"
+        "function nextTransferId() public view returns (uint256)",
+        "function admin() public view returns (address)"
     ]
 };
 

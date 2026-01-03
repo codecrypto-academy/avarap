@@ -1,28 +1,54 @@
 version: '3.8'
 
 services:
+  # Smart Contract Development Environment
+  foundry:
+    build: ./sc
+    container_name: supply-chain-foundry
+    volumes:
+      - ./sc:/app
+      - foundry-cache:/root/.foundry
+      - foundry-out:/app/out
+      - foundry-lib:/app/lib
+      - foundry-cache-local:/app/cache
+    working_dir: /app
+    command: tail -f /dev/null
+    networks:
+      - supply-chain-network
+
+  # Local Blockchain
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
     container_name: supply-chain-anvil
     ports:
       - "8545:8545"
-    command: anvil --host 0.0.0.0 --chain-id 31337
+    command: [ "anvil", "--host", "0.0.0.0", "--chain-id", "31337" ]
     networks:
-      - blockchain-network
+      - supply-chain-network
 
-  foundry:
-    image: ghcr.io/foundry-rs/foundry:latest
-    container_name: supply-chain-foundry
-    working_dir: /app
+  # Frontend Web Application
+  web:
+    build: ./web
+    container_name: supply-chain-web
+    ports:
+      - "3000:3000"
     volumes:
-      - ./sc:/app
-    networks:
-      - blockchain-network
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_RPC_URL=http://localhost:8545
     depends_on:
       - anvil
-    profiles:
-      - tools
+    networks:
+      - supply-chain-network
+
+volumes:
+  foundry-cache:
+  foundry-out:
+  foundry-lib:
+  foundry-cache-local:
+
 
 networks:
-  blockchain-network:
+  supply-chain-network:
     driver: bridge

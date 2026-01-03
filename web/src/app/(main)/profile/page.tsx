@@ -15,8 +15,20 @@ export default function ProfilePage() {
         const fetchUser = async () => {
             if (account) {
                 setLoading(true);
-                const info = await web3Service.getUserInfo(account);
-                setUserInfo(info);
+
+                // Admin check override
+                const contract = await web3Service.getContract();
+                const adminAddress = await contract?.admin();
+
+                if (adminAddress && account.toLowerCase() === adminAddress.toLowerCase()) {
+                    setUserInfo({
+                        2: "Admin", // Role
+                        3: 1        // Approved status (simulated)
+                    });
+                } else {
+                    const info = await web3Service.getUserInfo(account);
+                    setUserInfo(info);
+                }
                 setLoading(false);
             }
         };
