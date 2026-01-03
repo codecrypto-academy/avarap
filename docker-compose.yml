@@ -22,7 +22,7 @@ services:
     container_name: supply-chain-anvil
     ports:
       - "8545:8545"
-    command: [ "anvil", "--host", "0.0.0.0", "--chain-id", "31337" ]
+    entrypoint: [ "anvil", "--host", "0.0.0.0", "--chain-id", "31337" ]
     networks:
       - supply-chain-network
 

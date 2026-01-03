@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useWallet } from "@/hooks/useWallet";
@@ -8,19 +9,42 @@ import { Plus, Send, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { web3Service } from "@/lib/web3";
 
+import { RegisterUser } from "@/components/RegisterUser";
+
 export default function DashboardPage() {
     const { account } = useWallet();
     const [stats, setStats] = useState({ totalTokens: 0, pendingTransfers: 0, role: "Loading..." });
 
+    const fetchStats = async () => {
+        if (account) {
+            const data = await web3Service.getUserDashboardStats(account);
+            setStats(data);
+        }
+    };
+
     useEffect(() => {
-        const fetchStats = async () => {
-            if (account) {
-                const data = await web3Service.getUserDashboardStats(account);
-                setStats(data);
-            }
-        };
         fetchStats();
     }, [account]);
+
+    if (stats.role === "Loading...") {
+        return (
+            <div className="flex h-[50vh] items-center justify-center">
+                <div className="text-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (stats.role === "Not Registered" || stats.role === "Unknown" || stats.role === "Error") {
+        return (
+            <div className="space-y-6">
+                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                <RegisterUser onRegistered={fetchStats} />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

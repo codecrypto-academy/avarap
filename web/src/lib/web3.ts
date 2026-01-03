@@ -168,6 +168,20 @@ export class Web3Service {
         }
     }
 
+    async registerUser(role: string) {
+        const contract = await this.getContract();
+        if (!contract) throw new Error("Contract not initialized");
+
+        try {
+            const tx = await contract.requestUserRole(role);
+            await tx.wait();
+            return true;
+        } catch (e) {
+            console.error("Error registering user:", e);
+            throw e;
+        }
+    }
+
     async getTokenHistory(tokenId: number) {
         const contract = await this.getContract();
         if (!contract) return null;

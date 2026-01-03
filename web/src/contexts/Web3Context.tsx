@@ -32,6 +32,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         }
 
         if (typeof window !== "undefined" && window.ethereum) {
+            // Initial Chain ID fetch
+            window.ethereum.request({ method: "eth_chainId" })
+                .then((chainId: string) => setChainId(parseInt(chainId, 16)))
+                .catch((err: any) => console.error("Error fetching chainId:", err));
+
             window.ethereum.on("accountsChanged", (accounts: string[]) => {
                 if (accounts.length > 0) {
                     setAccount(accounts[0]);
