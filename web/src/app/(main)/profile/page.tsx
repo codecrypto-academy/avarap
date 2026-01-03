@@ -2,10 +2,41 @@
 
 import { useWallet } from "@/hooks/useWallet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { User, Shield, Activity } from "lucide-react";
+import { useEffect, useState } from "react";
+import { web3Service } from "@/lib/web3";
 
 export default function ProfilePage() {
     const { account, chainId } = useWallet();
+    const [userInfo, setUserInfo] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (account) {
+                setLoading(true);
+                const info = await web3Service.getUserInfo(account);
+                setUserInfo(info);
+                setLoading(false);
+            }
+        };
+        fetchUser();
+    }, [account]);
+
+    const getStatusBadge = (status: number) => {
+        const styles = {
+            0: "bg-yellow-100 text-yellow-800", // Pending
+            1: "bg-green-100 text-green-800",   // Approved
+            2: "bg-red-100 text-red-800",       // Rejected
+            3: "bg-gray-100 text-gray-800"      // Canceled
+        };
+        const labels = ["Pending", "Approved", "Rejected", "Canceled"];
+        return (
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status as keyof typeof styles] || "bg-gray-100"}`}>
+                {labels[status] || "Unknown"}
+            </span>
+        );
+    };
 
     return (
         <div className="space-y-6">
@@ -33,21 +64,30 @@ export default function ProfilePage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>User Status</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                            <Shield className="h-5 w-5" />
+                            User Status
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Role</p>
-                                <p className="text-lg font-bold">Producer</p>
+                        {account ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Role</p>
+                                    <p className="text-lg font-bold">
+                                        {loading ? "Loading..." : (userInfo && userInfo[2] ? userInfo[2] : "Not Registered")}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                                    <div className="mt-1">
+                                        {loading ? "..." : (userInfo ? getStatusBadge(Number(userInfo[3])) : "-")}
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Status</p>
-                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                                    Approved
-                                </span>
-                            </div>
-                        </div>
+                        ) : (
+                            <p className="text-muted-foreground">Connect wallet to view status</p>
+                        )}
                     </CardContent>
                 </Card>
             </div>

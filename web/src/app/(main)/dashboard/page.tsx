@@ -5,9 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, Send, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { web3Service } from "@/lib/web3";
 
 export default function DashboardPage() {
     const { account } = useWallet();
+    const [stats, setStats] = useState({ totalTokens: 0, pendingTransfers: 0, role: "Loading..." });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (account) {
+                const data = await web3Service.getUserDashboardStats(account);
+                setStats(data);
+            }
+        };
+        fetchStats();
+    }, [account]);
 
     return (
         <div className="space-y-6">
@@ -20,9 +33,9 @@ export default function DashboardPage() {
                         <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-2xl font-bold">{stats.totalTokens}</div>
                         <p className="text-xs text-muted-foreground">
-                            +0 from last month
+                            Owned tokens
                         </p>
                     </CardContent>
                 </Card>
@@ -32,9 +45,9 @@ export default function DashboardPage() {
                         <Send className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-2xl font-bold">{stats.pendingTransfers}</div>
                         <p className="text-xs text-muted-foreground">
-                            Requires attention
+                            Incoming transfers
                         </p>
                     </CardContent>
                 </Card>
@@ -57,9 +70,9 @@ export default function DashboardPage() {
                         </svg>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">Producer</div>
+                        <div className="text-2xl font-bold">{stats.role}</div>
                         <p className="text-xs text-muted-foreground">
-                            {account?.slice(0, 6)}...{account?.slice(-4)}
+                            {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : "Not connected"}
                         </p>
                     </CardContent>
                 </Card>

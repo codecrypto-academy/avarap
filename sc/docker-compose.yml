@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  foundry:
+    build: .
+    container_name: supply-chain-foundry
+    volumes:
+      - .:/app
+      - foundry-cache:/root/.foundry
+      - foundry-out:/app/out
+      - foundry-lib:/app/lib
+      - foundry-cache-local:/app/cache
+    working_dir: /app
+    command: tail -f /dev/null # Keep container running
+    networks:
+      - foundry-network
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: supply-chain-anvil
+    ports:
+      - "8545:8545"
+    command: [ "anvil", "--host", "0.0.0.0" ]
+    networks:
+      - foundry-network
+
+volumes:
+  foundry-cache:
+  foundry-out:
+  foundry-lib:
+  foundry-cache-local:
+
+
+networks:
+  foundry-network:
+    driver: bridge
